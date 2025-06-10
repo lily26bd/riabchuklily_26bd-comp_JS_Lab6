@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторна робота №6: Асинхронні операції</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 800px;
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .input-field {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #4a5568;
+            outline: none;
+            transition: border-color 0.2s ease-in-out;
+        }
+        .input-field:focus {
+            border-color: #6366f1;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #4CAF50; /* Зелений */
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #ef4444; /* Червоний */
+            color: white;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #dc2626;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            text-align: center;
+            color: #2d3748;
+            border: 1px solid #cbd5e0;
+        }
+        .message.success {
+            background-color: #d1fae5; /* Light green */
+            border-color: #34d399; /* Green */
+            color: #065f46;
+        }
+        .message.error {
+            background-color: #fee2e2; /* Light red */
+            border-color: #ef4444; /* Red */
+            color: #991b1b;
+        }
+        .question-block {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .question-block .question-text {
+            font-size: 1.1rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        .question-block .question-buttons .btn {
+            margin: 0 0.5rem;
+        }
+        .table-container {
+            margin-top: 2rem;
+            overflow-x: auto;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .data-table th {
+            background-color: #e2e8f0; /* Світло-сірий */
+            color: #4a5568;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            position: relative;
+            cursor: pointer;
+        }
+        .data-table th.sorted-asc,
+        .data-table th.sorted-desc {
+             background-color: #fce7f3; /* Світло-малиновий */
+             color: #c026d3; /* Темно-малиновий */
+        }
+        .data-table th .sort-arrows {
+            display: inline-flex;
+            flex-direction: column;
+            position: relative;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+            font-size: 0.7em;
+            color: #718096;
+        }
+        .data-table th .sort-arrows .arrow {
+            line-height: 0.5;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .data-table th .sort-arrows .arrow:hover {
+            color: #6366f1;
+        }
+        .data-table th .sort-arrows .arrow.active {
+            color: #6366f1;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table tbody tr:hover {
+            background-color: #f7fafc;
+        }
+        .reset-sort-btn-wrapper {
+            text-align: right;
+            margin-bottom: 1rem;
+        }
+        .reset-sort-btn {
+            background-color: #ef4444;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            border: none;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.3);
+        }
+        .reset-sort-btn:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">СЕРВІС ДЛЯ ЗАВАНТАЖЕННЯ ДАНІ З РЕСУРСУ {JSON} PLACEHOLDER</h1>
+
+        <div class="input-group">
+            <input type="text" id="urlInput" class="input-field" placeholder="ENTER URL" value="https://jsonplaceholder.typicode.com/users">
+            <button id="loadDataBtn" class="btn btn-primary">ЗАВАНТАЖИТИ ДАНІ</button>
+            <button id="clearBtn" class="btn btn-secondary" disabled>ОЧИСТИТИ</button>
+        </div>
+
+        <div id="statusMessage" class="message hidden"></div>
+
+        <div id="questionBlock" class="question-block hidden">
+            <p class="question-text">Відобразити Ваш варіант таблиці?</p>
+            <div class="question-buttons">
+                <button id="showTableBtn" class="btn btn-primary">ТАК</button>
+                <button id="hideTableBtn" class="btn btn-secondary">НІ</button>
+            </div>
+        </div>
+
+        <div id="tableOutputContainer" class="table-container hidden">
+            <div class="reset-sort-btn-wrapper">
+                <button id="resetSortBtn" class="reset-sort-btn">ОЧИСТИТИ СОРТУВАННЯ</button>
+            </div>
+            <table id="dataTable" class="data-table">
+                <thead>
+                    <tr id="tableHeaderRow">
+                        
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+   
+    <script src="script.js"></script>
+</body>
+</html>
